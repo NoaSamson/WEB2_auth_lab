@@ -22,7 +22,7 @@ const PORT = Number(process.env.PORT ?? 3000);
 const BASE_URL = process.env.RENDER_EXTERNAL_URL ?? `http://localhost:${PORT}`;
 
 const app = express();
-app.set('trust proxy', true); // Render runs behind a proxy
+app.set('trust proxy', true);
 
 
 interface PassRow {
@@ -230,10 +230,10 @@ app.post('/passes', checkJwt, requiredScopes('create:passes'), express.json(), a
   const id = randomUUID();
   await pool.query('INSERT INTO passes (id, name, document) VALUES ($1, $2, $3)', [id, name, document]);
 
-  const png = await QRCode.toBuffer(`${BASE_URL}/info/${id}`); // QR → public page
+  const png = await QRCode.toBuffer(`${BASE_URL}/info/${id}`);
   res
     .status(201)
-    .location(`${BASE_URL}/passes/${id}`) // Location → API endpoint
+    .location(`${BASE_URL}/passes/${id}`)
     .type('image/png')
     .send(png);
 });
@@ -260,7 +260,7 @@ const onError: express.ErrorRequestHandler = (err, _req, res, next) => {
 };
 app.use(onError);
 
-// --- Startup: create the table, then start listening -------------------------
+// Startup
 
 async function start(): Promise<void> {
   await pool.query(`
