@@ -22,3 +22,20 @@ export async function getToken(
   const data = (await res.json()) as { access_token: string };
   return data.access_token;
 }
+
+export async function issuePass(
+  url: string,
+  token: string,
+  name: string,
+  document: string
+): Promise<void> {
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ name, document }),
+  });
+  if (res.status !== 201) throw new Error(`Issuing pass failed with status ${res.status}`);
+
+  const id = res.headers.get('Location')!.split('/').pop()!; // Location: <BASE_URL>/passes/<id>
+  await writeFile(`${id}.png`, Buffer.from(await res.arrayBuffer())); // current directory
+}
